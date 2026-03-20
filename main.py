@@ -26,7 +26,6 @@ async def run_traffic_simulator():
     """Simulates a vehicle continuously patrolling up and down Rajpur Road."""
     print("🚗 Internal Ghost Vehicle Simulator automatically started...")
     
-    # 1. THE REAL, CURVED GPS TRACE OF RAJPUR ROAD
     # PERFECTLY MAPPED TO RAJPUR ROAD (Clock Tower to Rajpur)
     rajpur_waypoints = [
         (30.3245, 78.0416), (30.3275, 78.0435), (30.3300, 78.0456),
@@ -37,7 +36,7 @@ async def run_traffic_simulator():
         (30.3750, 78.0725), (30.3800, 78.0750)
     ]
     
-    # 2. Create the infinite patrol loop (Drive UP, then turn around and drive DOWN)
+    # Create the infinite patrol loop (Drive UP, then turn around and drive DOWN)
     patrol_route = rajpur_waypoints + rajpur_waypoints[::-1]
 
     async with httpx.AsyncClient() as client:
@@ -67,7 +66,8 @@ async def run_traffic_simulator():
                     }
 
                     try:
-                        await client.post("http://127.0.0.1:8000/api/v1/telemetry/sensor-data", json=payload)
+                        # THE FIX 1: Point the simulator to the LIVE Render database!
+                        await client.post("https://terrametrics-api.onrender.com/api/v1/telemetry/sensor-data", json=payload)
                     except Exception:
                         pass
                     
@@ -99,9 +99,10 @@ app = FastAPI(
     lifespan=lifespan  
 )
 
+# THE FIX 2: Allow all origins so Vercel and Localhost both work seamlessly
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
