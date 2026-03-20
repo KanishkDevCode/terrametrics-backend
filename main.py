@@ -100,14 +100,24 @@ app = FastAPI(
 )
 
 # THE FIX 2: Allow all origins so Vercel and Localhost both work seamlessly
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"], 
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+# Option 1: Explicit Origins (Safe and allows credentials)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=[
+        "http://localhost:5174",            # Your local Vite/React frontend
+        "https://terrametrics-frontend.vercel.app"   # Add your production frontend URL here
+    ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Include modular routers
 app.include_router(geospatial.router, prefix="/api/v1/geo")
 app.include_router(telemetry.router, prefix="/api/v1/telemetry")
